@@ -9,6 +9,7 @@
     --gray-900: #121214;
 
     --green-500: #00875f;
+    --green-300: #00B37E;
 }
 
 * {
@@ -27,4 +28,9 @@ body, input, textarea, button {
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
     font-size: 1rem;
+}
+
+:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--green-500);
 }
