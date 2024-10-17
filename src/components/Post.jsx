@@ -1,38 +1,81 @@
-import { Comment } from './Comment';
-import styles from './Post.module.css';
+import { format, formatDistanceToNow } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 import { Avatar } from './Avatar';
+import { Comment } from './Comment';
+import { useState } from 'react';
 
-export function Post(props) {
-    console.log(props)
-    return(
-        <article className={styles.post}>
-            <header>
-                <div className={styles.author}>
-                <Avatar  src="data:image/jpeg;base64,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" />
-                <div className={styles.authorInfo}>
-                    <strong>Bruna Dantas</strong>
-                    <span>FullStack Developer</span>
-                </div>
-                </div>
-                <time title="11 de maio às 08:13h" dateTime="2022-05-11 08:13:30"> Publicado há 1h </time>
-            </header >
+import styles from './Post.module.css';
 
-             <div className={styles.content}> 
-                
-             </div>
-            <form className={styles.commentForm}>
-                <strong>Deixe seu feedback</strong>
-                <textarea placeholder="Deixe um comentário"/>
-                <footer>
-                    <button type="submit">Comentar</button>
-                </footer>
-            </form>
+export function Post({ author, publishedAt, content }) {
+    const [comments, setComments] = useState([
+        1,
+        2,
+      ]);
+  const publishedDateFormatted = format(publishedAt, "d 'de' LLLL 'às' HH:mm'h'", {
+    locale: ptBR,
+  });
+  const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
+    locale: ptBR,
+    addSuffix: true
+  });
 
-            <div className={styles.commentList}>
-                <Comment/>
-                <Comment/>
-                <Comment/>
-            </div>
-        </article>
-    )
+  function handleCrateNewComment() {
+    event.preventDefault()
+    setComments([...comments, comments.length + 1]);
+  }
+
+  return (
+    <article className={styles.post}>
+      <header>
+        <div className={styles.author}>
+          <Avatar src={author.avatarUrl} />
+          <div className={styles.authorInfo}>
+            <strong>{author.name}</strong>
+            <span>{author.role}</span>
+          </div>
+        </div>
+
+
+        <time title={publishedDateFormatted} dateTime={publishedAt.toISOString()}>
+          {publishedDateRelativeToNow}
+        </time>
+      </header>
+
+      <div className={styles.content}>
+        <p>Fala galeraa 👋</p>
+        <p>Acabei de subir mais um projeto no meu portifa. É um projeto que fiz no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀</p>
+        <p><a href="">jane.design/doctorcare</a></p>
+        <p>
+          <a href="">#novoprojeto</a>{' '}
+          <a href="">#nlw</a>{' '}
+          <a href="">#rocketseat</a>
+        </p>
+        {content.map(line => {
+          if (line.type === 'paragraph') {
+            return <p>{line.content}</p>;
+          } else if (line.type === 'link') {
+            return <p><a href="#">{line.content}</a></p>
+          }
+        })}
+      </div>
+
+      <form onSubmit={handleCrateNewComment} className={styles.commentForm}>
+        <strong>Deixe seu feedback</strong>
+
+        <textarea
+          placeholder="Deixe um comentário"
+        />
+
+        <footer>
+          <button type="submit">Publicar</button>
+        </footer>
+      </form>
+
+      <div className={styles.commentList}>
+        {comments.map(comment => {
+          return <Comment />
+        })}
+      </div>
+    </article>
+  )
 }
